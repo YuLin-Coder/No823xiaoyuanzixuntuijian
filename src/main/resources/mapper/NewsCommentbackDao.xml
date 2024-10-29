@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dao.NewsCommentbackDao">
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        a.id as id
+        ,a.news_id as newsId
+        ,a.yonghu_id as yonghuId
+        ,a.insert_time as insertTime
+        ,a.xinwen_commentback_content as xinwenCommentbackContent
+        ,a.commentback_types as commentbackTypes
+        ,a.create_time as createTime
+    </sql>
+    <select id="selectListView" parameterType="map" resultType="com.entity.view.NewsCommentbackView" >
+        SELECT
+        <include refid="Base_Column_List" />
+
+--         级联表的字段
+        ,news.news_name as newsName
+        ,news.news_types as newsTypes
+        ,news.news_photo as newsPhoto
+        ,news.insert_time as insertTime
+        ,news.news_content as newsContent
+        ,yonghu.yonghu_name as yonghuName
+        ,yonghu.sex_types as sexTypes
+        ,yonghu.yonghu_id_number as yonghuIdNumber
+        ,yonghu.yonghu_phone as yonghuPhone
+        ,yonghu.yonghu_photo as yonghuPhoto
+
+        FROM news_commentback  a
+        left JOIN news news ON a.news_id = news.id
+        left JOIN yonghu yonghu ON a.yonghu_id = yonghu.id
+
+        <where>
+            <if test="params.newsId != null">
+                and a.news_id = #{params.newsId}
+            </if>
+            <if test="params.yonghuId != null">
+                and a.yonghu_id = #{params.yonghuId}
+            </if>
+            <if test=" params.insertTimeStart != '' and params.insertTimeStart != null ">
+                <![CDATA[  and DATE_FORMAT(a.insert_time, '%Y-%m-%d %H:%T:%s') >=
+                DATE_FORMAT(#{params.insertTimeStart}, '%Y-%m-%d %H:%T:%s')   ]]>
+            </if>
+            <if test=" params.insertTimeEnd != '' and params.insertTimeEnd != null ">
+                <![CDATA[  and DATE_FORMAT(a.insert_time, '%Y-%m-%d %H:%T:%s') <=
+                DATE_FORMAT(#{params.insertTimeEnd} , '%Y-%m-%d %H:%T:%s')    ]]>
+            </if>
+            <if test=" params.xinwenCommentbackContent != '' and params.xinwenCommentbackContent != null and params.xinwenCommentbackContent != 'null' ">
+                and a.xinwen_commentback_content like CONCAT('%',#{params.xinwenCommentbackContent},'%')
+            </if>
+            <if test="params.commentbackTypes != null">
+                and a.commentback_types = #{params.commentbackTypes}
+            </if>
+
+            <if test=" params.newsName != '' and params.newsName != null and params.newsName != 'null' ">
+                and news.news_name like CONCAT('%',#{params.newsName},'%')
+            </if>
+            <if test="params.newsTypes != null">
+                and news.news_types = #{params.newsTypes}
+            </if>
+
+            <if test=" params.insertTimeStart != '' and params.insertTimeStart != null ">
+                <![CDATA[  and DATE_FORMAT(news.insert_time, '%Y-%m-%d %H:%T:%s') >=
+                DATE_FORMAT(#{params.insertTimeStart}, '%Y-%m-%d %H:%T:%s')   ]]>
+            </if>
+            <if test=" params.insertTimeEnd != '' and params.insertTimeEnd != null ">
+                <![CDATA[  and DATE_FORMAT(news.insert_time, '%Y-%m-%d %H:%T:%s') <=
+                DATE_FORMAT(#{params.insertTimeEnd} , '%Y-%m-%d %H:%T:%s')    ]]>
+            </if>
+            <if test=" params.newsContent != '' and params.newsContent != null and params.newsContent != 'null' ">
+                and news.news_content like CONCAT('%',#{params.newsContent},'%')
+            </if>
+            <if test=" params.yonghuName != '' and params.yonghuName != null and params.yonghuName != 'null' ">
+                and yonghu.yonghu_name like CONCAT('%',#{params.yonghuName},'%')
+            </if>
+            <if test="params.sexTypes != null">
+                and yonghu.sex_types = #{params.sexTypes}
+            </if>
+
+            <if test=" params.yonghuIdNumber != '' and params.yonghuIdNumber != null and params.yonghuIdNumber != 'null' ">
+                and yonghu.yonghu_id_number like CONCAT('%',#{params.yonghuIdNumber},'%')
+            </if>
+            <if test=" params.yonghuPhone != '' and params.yonghuPhone != null and params.yonghuPhone != 'null' ">
+                and yonghu.yonghu_phone like CONCAT('%',#{params.yonghuPhone},'%')
+            </if>
+        </where>
+        order by a.${params.orderBy} desc
+    </select>
+
+</mapper>
